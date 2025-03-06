@@ -100,7 +100,7 @@ Motionen ska vara skriven för att gå igenom i regionfullmäktige.`
     const streamResponse = new ReadableStream({
       async start(controller) {
         try {
-          let timeoutId = setTimeout(() => {
+          const timeoutId = setTimeout(() => {
             controller.enqueue(encoder.encode("\n\n[Notering: Texten har avbrutits på grund av tidsbegränsning. Vänligen försök igen med ett kortare ämne.]"))
             controller.close()
           }, 8000) // 8 sekunders timeout
