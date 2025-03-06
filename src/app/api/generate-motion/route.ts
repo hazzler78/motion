@@ -50,11 +50,19 @@ Värmlandsperspektiv:
 - Näringsliv
 
 VIKTIGT - Följ dessa regler strikt:
-1. Inled motionen med exakt "Sverigedemokraterna yrkar:" (detta är en inledning, INTE ett förslag)
+1. Inled motionen med exakt "Sverigedemokraterna yrkar att" (detta är en inledning, INTE ett förslag)
 2. Efter inledningen, börja varje förslag med exakt "att"
 3. Skriv varje förslag på en ny rad
 4. Använd INGA andra formuleringar som "förslag till åtgärder" eller liknande
-5. Skriv retoriskt starka, faktabaserade motioner`
+5. Skriv retoriskt starka, faktabaserade motioner
+6. Följ ALLTID exakt formatet i exemplet nedan
+
+Exempel på korrekt format:
+Sverigedemokraterna yrkar att
+
+att Region Värmland ska...
+att Kommunerna ska...
+att Välfärden ska...`
 
     const userPrompt = `Skriv en regional motion för Sverigedemokraterna i Värmland om: "${topic}"
 
@@ -64,7 +72,7 @@ Struktur:
 3. Bakgrund
 4. Syfte
 5. Förslag (FÖLJ EXAKT DETTA FORMAT):
-   Sverigedemokraterna yrkar:
+   Sverigedemokraterna yrkar att
    
    att Region Värmland ska...
    att Kommunerna ska...
@@ -87,7 +95,7 @@ VIKTIGT: Använd endast ren text, inga specialtecken. Följ exakt formatet ovan.
         }
       ],
       temperature: 0.6,
-      max_tokens: 4000,
+      max_tokens: 6000,
       stream: true
     })
 
