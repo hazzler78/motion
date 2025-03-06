@@ -101,17 +101,29 @@ Använd ren text, inga specialtecken.`
             if (content) {
               buffer += content
               // Skicka bufferten när den når en rimlig storlek eller vid radbrytning
-              if (buffer.length > 25 || content.includes('\n')) {
-                controller.enqueue(encoder.encode(buffer))
-                buffer = ''
-                // Ge Vercel lite tid att hantera varje chunk
-                await new Promise(resolve => setTimeout(resolve, 10))
+              if (buffer.length > 15 || content.includes('\n')) {
+                try {
+                  controller.enqueue(encoder.encode(buffer))
+                  buffer = ''
+                  // Ge Vercel mer tid att hantera varje chunk
+                  await new Promise(resolve => setTimeout(resolve, 50))
+                } catch (err) {
+                  console.error('Error sending chunk:', err)
+                  // Om vi får ett fel vid sändning, vänta lite längre och försök igen
+                  await new Promise(resolve => setTimeout(resolve, 100))
+                  controller.enqueue(encoder.encode(buffer))
+                  buffer = ''
+                }
               }
             }
           }
           // Skicka eventuell återstående text i bufferten
           if (buffer) {
-            controller.enqueue(encoder.encode(buffer))
+            try {
+              controller.enqueue(encoder.encode(buffer))
+            } catch (err) {
+              console.error('Error sending final buffer:', err)
+            }
           }
           clearTimeout(timeoutId)
         } catch (err) {
