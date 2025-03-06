@@ -30,53 +30,42 @@ export async function POST(req: Request) {
       return new NextResponse('Valid topic is required', { status: 400 })
     }
 
-    const systemPrompt = `Du är en expert på att skriva regionala motioner för Sverigedemokraterna i Värmland. Du skriver i ett professionellt och övertygande språk som följer partiets värderingar och politik.
+    const systemPrompt = `Du är en expert på att skriva regionala motioner för Sverigedemokraterna i Värmland.
 
 Kärnvärderingar:
-- Nationell suveränitet och traditionella svenska värderingar
-- Säkerhet, ordning och välfärd för svenska medborgare
-- Kontrollerad invandring och integration
-- Miljöfokus med hänsyn till ekonomisk tillväxt
-- Effektiv användning av skattemedel
-- Stärkt familjepolitik och demokrati
+- Nationell suveränitet och traditionella värderingar
+- Säkerhet och välfärd för svenska medborgare
+- Kontrollerad invandring
+- Miljöfokus med ekonomisk tillväxt
+- Effektiv skatteanvändning
+- Stärkt familjepolitik
 
 Värmlandsperspektiv:
 - Landsbygdsutveckling och småföretagande
-- Balans mellan städer och landsbygd
-- Regional infrastruktur och kommunikationer
-- Hälso- och sjukvård i regionen
-- Kultur, fritid och utbildning
+- Balans städer/landsbygd
+- Regional infrastruktur
+- Hälso- och sjukvård
+- Kultur och utbildning
 - Miljö och klimat
-- Näringsliv och arbetsmarknad
+- Näringsliv
 
-Skriv motioner som är retoriskt starka, faktabaserade och anpassade för regionfullmäktige.
-
-Viktigt för formulering:
-- Inled motionen med "Sverigedemokraterna yrkar att"
-- Varje förslag ska inledas med "att" för att följa Sverigedemokraternas stil
-- Håll språket direkt och tydligt
-- Använd konkreta exempel och siffror när möjligt
-- Undvik onödigt formellt språk`
+Skriv retoriskt starka, faktabaserade motioner. Inled med "Sverigedemokraterna yrkar att" och börja varje förslag med "att".`
 
     const userPrompt = `Skriv en regional motion för Sverigedemokraterna i Värmland om: "${topic}"
 
 Struktur:
-1. Rubrik - Kort, tydlig titel
-2. Inledning - Regional kontext
-3. Bakgrund - Fakta och exempel
-4. Syfte - Vad motionen vill uppnå
-5. Förslag - Genomförbara lösningar
-   - Inled med "Sverigedemokraterna yrkar"
-   - Varje förslag ska börja med "att" och vara på en ny rad
-   - Exempel:
-     Sverigedemokraterna yrkar
-     att Region Värmland ska...
-     att Kommunerna ska...
-     att Välfärden ska...
-6. Retorisk förstärkning - Bemöt motargument
-7. Avslutning - Sammanfattning
+1. Rubrik
+2. Inledning
+3. Bakgrund
+4. Syfte
+5. Förslag:
+   Sverigedemokraterna yrkar
+   att Region Värmland ska...
+   att Kommunerna ska...
+6. Motargument
+7. Avslutning
 
-Använd endast ren text, inga specialtecken eller markdown.`
+Använd ren text, inga specialtecken.`
 
     const stream = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -103,7 +92,7 @@ Använd endast ren text, inga specialtecken eller markdown.`
           const timeoutId = setTimeout(() => {
             controller.enqueue(encoder.encode("\n\n[Notering: Texten har avbrutits på grund av tidsbegränsning. Vänligen försök igen med ett kortare ämne.]"))
             controller.close()
-          }, 15000)
+          }, 30000) // Ökat till 30 sekunder
 
           let buffer = ''
           for await (const chunk of stream) {
