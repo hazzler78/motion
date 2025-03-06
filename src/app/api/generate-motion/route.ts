@@ -92,7 +92,7 @@ Använd ren text, inga specialtecken.`
           const timeoutId = setTimeout(() => {
             controller.enqueue(encoder.encode("\n\n[Notering: Texten har avbrutits på grund av tidsbegränsning. Vänligen försök igen med ett kortare ämne.]"))
             controller.close()
-          }, 30000) // Ökat till 30 sekunder
+          }, 30000)
 
           let buffer = ''
           for await (const chunk of stream) {
@@ -101,9 +101,11 @@ Använd ren text, inga specialtecken.`
             if (content) {
               buffer += content
               // Skicka bufferten när den når en rimlig storlek eller vid radbrytning
-              if (buffer.length > 50 || content.includes('\n')) {
+              if (buffer.length > 25 || content.includes('\n')) {
                 controller.enqueue(encoder.encode(buffer))
                 buffer = ''
+                // Ge Vercel lite tid att hantera varje chunk
+                await new Promise(resolve => setTimeout(resolve, 10))
               }
             }
           }
@@ -126,7 +128,7 @@ Använd ren text, inga specialtecken.`
         'Transfer-Encoding': 'chunked',
         'Cache-Control': 'no-cache, no-transform',
         'Connection': 'keep-alive',
-        'X-Accel-Buffering': 'no' // Förhindrar buffering på server-sidan
+        'X-Accel-Buffering': 'no'
       }
     })
 
