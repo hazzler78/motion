@@ -91,7 +91,7 @@ Använd endast ren text, inga specialtecken eller markdown.`
         }
       ],
       temperature: 0.6,
-      max_tokens: 2000,
+      max_tokens: 4000,
       stream: true
     })
 
