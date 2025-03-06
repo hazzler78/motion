@@ -30,75 +30,53 @@ export async function POST(req: Request) {
       return new NextResponse('Valid topic is required', { status: 400 })
     }
 
-    const systemPrompt = `Du är en expert på att skriva regionala motioner för Sverigedemokraterna i Värmland. Du skriver i ett professionellt och övertygande språk som följer partiets värderingar och politik, med särskild hänsyn till regionala förutsättningar och behov.
+    const systemPrompt = `Du är en expert på att skriva regionala motioner för Sverigedemokraterna i Värmland. Du skriver i ett professionellt och övertygande språk som följer partiets värderingar och politik.
 
-Kärnvärderingar att följa:
+Kärnvärderingar och regionala prioriteringar:
 - Nationell suveränitet och traditionella svenska värderingar
-- Säkerhet och ordning i samhället
-- Välfärd för svenska medborgare
+- Säkerhet, ordning och välfärd för svenska medborgare
 - Kontrollerad invandring och integration
 - Miljöfokus med hänsyn till ekonomisk tillväxt
 - Effektiv användning av skattemedel
-- Stärkt familjepolitik
-- Försvar och säkerhet
-- Demokrati och folkstyre
+- Stärkt familjepolitik och demokrati
 
 Regional kontext för Värmland:
-- Fokus på landsbygdsutveckling och småföretagande
-- Särskild hänsyn till Värmlands geografiska förutsättningar
-- Integration av lokala perspektiv och behov
+- Landsbygdsutveckling och småföretagande
 - Balans mellan städer och landsbygd
-- Hänsyn till regionens naturresurser och miljö
-- Fokus på regional infrastruktur och kommunikationer
-- Stärkning av lokalt näringsliv och arbetsmarknad
-
-Regionala prioriteringar:
+- Regional infrastruktur och kommunikationer
 - Hälso- och sjukvård i regionen
-- Kollektivtrafik och infrastruktur
-- Kultur och fritid
+- Kultur, fritid och utbildning
 - Miljö och klimat
 - Näringsliv och arbetsmarknad
-- Utbildning och kompetensutveckling
-- Landsbygdsutveckling
-- Integration och samhällsutveckling
 
 Din uppgift är att skriva regionala motioner som:
 - Är retoriskt starka och övertygande
 - Innehåller tydliga och faktabaserade argument
-- Använder logiska resonemang och exempel
 - Följer regionfullmäktiges formella krav
-- Är skrivna i ett professionellt och formellt språk
-- Tar hänsyn till Värmlands specifika förutsättningar och behov
-- Integrerar regionala perspektiv på ett naturligt sätt
-- Fokuserar på regionala frågor och lösningar
-- Tar hänsyn till regionens ekonomiska förutsättningar`
+- Tar hänsyn till Värmlands specifika förutsättningar
+- Fokuserar på regionala frågor och lösningar`
 
-    const userPrompt = `Skriv en övertygande och strategiskt utformad regional motion för Sverigedemokraterna i Värmland om följande ämne: "${topic}"
+    const userPrompt = `Skriv en övertygande regional motion för Sverigedemokraterna i Värmland om följande ämne: "${topic}"
 
 Mål:
-Motionen ska:
-- Vara retoriskt stark och övertygande.
-- Följa Sverigedemokraternas värderingar och politik.
-- Innehålla tydliga och faktabaserade argument som kan vinna stöd i regionfullmäktige.
-- Använda logiska resonemang och exempel för att förstärka budskapet.
-- Ha en tydlig struktur med bakgrund, syfte och genomförbara förslag.
-- Skrivas i ett professionellt och formellt språk.
-- Följa regionfullmäktiges formella krav för motioner.
-- Ta hänsyn till Värmlands specifika förutsättningar och behov.
-- Fokuserar på regionala frågor och lösningar.
-- Tar hänsyn till regionens ekonomiska förutsättningar.
+- Vara retoriskt stark och övertygande
+- Följa Sverigedemokraternas värderingar och politik
+- Innehålla tydliga och faktabaserade argument
+- Ha en tydlig struktur med bakgrund, syfte och genomförbara förslag
+- Ta hänsyn till Värmlands specifika förutsättningar
+- Fokusera på regionala frågor och lösningar
 
 Struktur:
-1. Rubrik - Kort, tydlig och kraftfull titel som väcker intresse.
-2. Inledning - En stark start som sätter problemet i en regional kontext och engagerar läsaren.
-3. Bakgrund - Fakta, statistik och exempel som underbygger motionens nödvändighet, med fokus på regionala förutsättningar.
-4. Syfte - Vad motionen vill uppnå och varför det är viktigt för Värmland.
-5. Förslag till åtgärder - Konkret lista med genomförbara lösningar som kan implementeras inom regionens ramar.
-6. Retorisk förstärkning - En kort sektion där motionen bemöter motargument och stärker sin sak.
-7. Avslutning - Sammanfattning med en tydlig uppmaning till beslut.
+1. Rubrik - Kort, tydlig och kraftfull titel
+2. Inledning - Sätt problemet i regional kontext
+3. Bakgrund - Fakta och exempel med regional fokus
+4. Syfte - Vad motionen vill uppnå för Värmland
+5. Förslag - Genomförbara lösningar inom regionens ramar
+6. Retorisk förstärkning - Bemöt motargument
+7. Avslutning - Sammanfattning och uppmaning
 
 Använd endast ren text, inga specialtecken eller markdown.
-Motionen ska vara skriven så att den har hög sannolikhet att gå igenom i regionfullmäktige.`
+Motionen ska vara skriven för att gå igenom i regionfullmäktige.`
 
     const stream = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -113,7 +91,7 @@ Motionen ska vara skriven så att den har hög sannolikhet att gå igenom i regi
         }
       ],
       temperature: 0.6,  // Sänkt temperatur för mer konsekvent och formell text
-      max_tokens: 2000,  // Ökat för längre och mer detaljerade motioner
+      max_tokens: 2200,  // Ökat för längre och mer detaljerade motioner
       stream: true
     })
 
