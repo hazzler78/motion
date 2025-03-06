@@ -100,8 +100,8 @@ Använd ren text, inga specialtecken.`
             const content = chunk.choices[0]?.delta?.content || ''
             if (content) {
               buffer += content
-              // Skicka bufferten när den når en rimlig storlek
-              if (buffer.length > 100) {
+              // Skicka bufferten när den når en rimlig storlek eller vid radbrytning
+              if (buffer.length > 50 || content.includes('\n')) {
                 controller.enqueue(encoder.encode(buffer))
                 buffer = ''
               }
