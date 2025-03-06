@@ -49,7 +49,14 @@ Värmlandsperspektiv:
 - Miljö och klimat
 - Näringsliv och arbetsmarknad
 
-Skriv motioner som är retoriskt starka, faktabaserade och anpassade för regionfullmäktige.`
+Skriv motioner som är retoriskt starka, faktabaserade och anpassade för regionfullmäktige.
+
+Viktigt för formulering:
+- Inled motionen med "Sverigedemokraterna yrkar att"
+- Varje förslag ska inledas med "att" för att följa Sverigedemokraternas stil
+- Håll språket direkt och tydligt
+- Använd konkreta exempel och siffror när möjligt
+- Undvik onödigt formellt språk`
 
     const userPrompt = `Skriv en regional motion för Sverigedemokraterna i Värmland om: "${topic}"
 
@@ -59,6 +66,13 @@ Struktur:
 3. Bakgrund - Fakta och exempel
 4. Syfte - Vad motionen vill uppnå
 5. Förslag - Genomförbara lösningar
+   - Inled med "Sverigedemokraterna yrkar"
+   - Varje förslag ska börja med "att" och vara på en ny rad
+   - Exempel:
+     Sverigedemokraterna yrkar
+     att Region Värmland ska...
+     att Kommunerna ska...
+     att Välfärden ska...
 6. Retorisk förstärkning - Bemöt motargument
 7. Avslutning - Sammanfattning
 
