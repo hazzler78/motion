@@ -49,7 +49,12 @@ Värmlandsperspektiv:
 - Miljö och klimat
 - Näringsliv
 
-Skriv retoriskt starka, faktabaserade motioner. Inled med "Sverigedemokraterna yrkar att" och börja varje förslag med "att".`
+VIKTIGT - Följ dessa regler strikt:
+1. Inled motionen med exakt "Sverigedemokraterna yrkar:" (detta är en inledning, INTE ett förslag)
+2. Efter inledningen, börja varje förslag med exakt "att"
+3. Skriv varje förslag på en ny rad
+4. Använd INGA andra formuleringar som "förslag till åtgärder" eller liknande
+5. Skriv retoriskt starka, faktabaserade motioner`
 
     const userPrompt = `Skriv en regional motion för Sverigedemokraterna i Värmland om: "${topic}"
 
@@ -58,14 +63,16 @@ Struktur:
 2. Inledning
 3. Bakgrund
 4. Syfte
-5. Förslag:
-   Sverigedemokraterna yrkar
+5. Förslag (FÖLJ EXAKT DETTA FORMAT):
+   Sverigedemokraterna yrkar:
+   
    att Region Värmland ska...
    att Kommunerna ska...
+   att Välfärden ska...
 6. Motargument
 7. Avslutning
 
-Använd ren text, inga specialtecken.`
+VIKTIGT: Använd endast ren text, inga specialtecken. Följ exakt formatet ovan.`
 
     const stream = await openai.chat.completions.create({
       model: "gpt-4o-mini",
