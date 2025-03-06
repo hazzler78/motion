@@ -91,24 +91,31 @@ Motionen ska vara skriven för att gå igenom i regionfullmäktige.`
         }
       ],
       temperature: 0.6,  // Sänkt temperatur för mer konsekvent och formell text
-      max_tokens: 2200,  // Ökat för längre och mer detaljerade motioner
+      max_tokens: 1500,  // Minskat för att undvika timeout
       stream: true
     })
 
-    // Konvertera stream till ReadableStream
+    // Konvertera stream till ReadableStream med timeout-hantering
     const encoder = new TextEncoder()
     const streamResponse = new ReadableStream({
       async start(controller) {
         try {
+          let timeoutId = setTimeout(() => {
+            controller.enqueue(encoder.encode("\n\n[Notering: Texten har avbrutits på grund av tidsbegränsning. Vänligen försök igen med ett kortare ämne.]"))
+            controller.close()
+          }, 8000) // 8 sekunders timeout
+
           for await (const chunk of stream) {
+            clearTimeout(timeoutId) // Återställ timeout för varje chunk
             const content = chunk.choices[0]?.delta?.content || ''
             if (content) {
               controller.enqueue(encoder.encode(content))
             }
           }
+          clearTimeout(timeoutId) // Rensa timeout när vi är klara
         } catch (err) {
           console.error('Stream error:', err)
-          controller.enqueue(encoder.encode("Ett fel uppstod vid generering av texten. Vänligen försök igen."))
+          controller.enqueue(encoder.encode("\n\nEtt fel uppstod vid generering av texten. Vänligen försök igen."))
         }
         controller.close()
       }
@@ -117,7 +124,9 @@ Motionen ska vara skriven för att gå igenom i regionfullmäktige.`
     return new Response(streamResponse, {
       headers: {
         'Content-Type': 'text/plain',
-        'Transfer-Encoding': 'chunked'
+        'Transfer-Encoding': 'chunked',
+        'Cache-Control': 'no-cache, no-transform',
+        'Connection': 'keep-alive'
       }
     })
 
