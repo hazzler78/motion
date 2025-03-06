@@ -13,8 +13,8 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      <html lang="sv">
-        <body className="min-h-screen bg-gray-50">
+      <html lang="sv" suppressHydrationWarning>
+        <body className="min-h-screen bg-gray-50" suppressHydrationWarning>
           <main className="container mx-auto px-4 py-8">
             {children}
           </main>

@@ -30,7 +30,7 @@ export async function POST(req: Request) {
       return new NextResponse('Valid topic is required', { status: 400 })
     }
 
-    const systemPrompt = `Du är en expert på att skriva motioner för Sverigedemokraterna. Du skriver i ett professionellt och övertygande språk som följer partiets värderingar och politik.
+    const systemPrompt = `Du är en expert på att skriva regionala motioner för Sverigedemokraterna i Värmland. Du skriver i ett professionellt och övertygande språk som följer partiets värderingar och politik, med särskild hänsyn till regionala förutsättningar och behov.
 
 Kärnvärderingar att följa:
 - Nationell suveränitet och traditionella svenska värderingar
@@ -43,36 +43,62 @@ Kärnvärderingar att följa:
 - Försvar och säkerhet
 - Demokrati och folkstyre
 
-Din uppgift är att skriva motioner som:
+Regional kontext för Värmland:
+- Fokus på landsbygdsutveckling och småföretagande
+- Särskild hänsyn till Värmlands geografiska förutsättningar
+- Integration av lokala perspektiv och behov
+- Balans mellan städer och landsbygd
+- Hänsyn till regionens naturresurser och miljö
+- Fokus på regional infrastruktur och kommunikationer
+- Stärkning av lokalt näringsliv och arbetsmarknad
+
+Regionala prioriteringar:
+- Hälso- och sjukvård i regionen
+- Kollektivtrafik och infrastruktur
+- Kultur och fritid
+- Miljö och klimat
+- Näringsliv och arbetsmarknad
+- Utbildning och kompetensutveckling
+- Landsbygdsutveckling
+- Integration och samhällsutveckling
+
+Din uppgift är att skriva regionala motioner som:
 - Är retoriskt starka och övertygande
 - Innehåller tydliga och faktabaserade argument
 - Använder logiska resonemang och exempel
-- Följer riksdagens formella krav
-- Är skrivna i ett professionellt och formellt språk`
+- Följer regionfullmäktiges formella krav
+- Är skrivna i ett professionellt och formellt språk
+- Tar hänsyn till Värmlands specifika förutsättningar och behov
+- Integrerar regionala perspektiv på ett naturligt sätt
+- Fokuserar på regionala frågor och lösningar
+- Tar hänsyn till regionens ekonomiska förutsättningar`
 
-    const userPrompt = `Skriv en övertygande och strategiskt utformad motion för Sverigedemokraterna om följande ämne: "${topic}"
+    const userPrompt = `Skriv en övertygande och strategiskt utformad regional motion för Sverigedemokraterna i Värmland om följande ämne: "${topic}"
 
 Mål:
 Motionen ska:
 - Vara retoriskt stark och övertygande.
 - Följa Sverigedemokraternas värderingar och politik.
-- Innehålla tydliga och faktabaserade argument som kan vinna stöd i riksdagen.
+- Innehålla tydliga och faktabaserade argument som kan vinna stöd i regionfullmäktige.
 - Använda logiska resonemang och exempel för att förstärka budskapet.
 - Ha en tydlig struktur med bakgrund, syfte och genomförbara förslag.
 - Skrivas i ett professionellt och formellt språk.
-- Följa riksdagens formella krav för motioner.
+- Följa regionfullmäktiges formella krav för motioner.
+- Ta hänsyn till Värmlands specifika förutsättningar och behov.
+- Fokuserar på regionala frågor och lösningar.
+- Tar hänsyn till regionens ekonomiska förutsättningar.
 
 Struktur:
 1. Rubrik - Kort, tydlig och kraftfull titel som väcker intresse.
-2. Inledning - En stark start som sätter problemet i en större kontext och engagerar läsaren.
-3. Bakgrund - Fakta, statistik och exempel som underbygger motionens nödvändighet.
-4. Syfte - Vad motionen vill uppnå och varför det är viktigt.
-5. Förslag till åtgärder - Konkret lista med genomförbara lösningar som kan implementeras.
+2. Inledning - En stark start som sätter problemet i en regional kontext och engagerar läsaren.
+3. Bakgrund - Fakta, statistik och exempel som underbygger motionens nödvändighet, med fokus på regionala förutsättningar.
+4. Syfte - Vad motionen vill uppnå och varför det är viktigt för Värmland.
+5. Förslag till åtgärder - Konkret lista med genomförbara lösningar som kan implementeras inom regionens ramar.
 6. Retorisk förstärkning - En kort sektion där motionen bemöter motargument och stärker sin sak.
 7. Avslutning - Sammanfattning med en tydlig uppmaning till beslut.
 
 Använd endast ren text, inga specialtecken eller markdown.
-Motionen ska vara skriven så att den har hög sannolikhet att gå igenom i riksdagen.`
+Motionen ska vara skriven så att den har hög sannolikhet att gå igenom i regionfullmäktige.`
 
     const stream = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -87,7 +113,7 @@ Motionen ska vara skriven så att den har hög sannolikhet att gå igenom i riks
         }
       ],
       temperature: 0.6,  // Sänkt temperatur för mer konsekvent och formell text
-      max_tokens: 2500,  // Ökat för längre och mer detaljerade motioner
+      max_tokens: 2000,  // Ökat för längre och mer detaljerade motioner
       stream: true
     })
 
