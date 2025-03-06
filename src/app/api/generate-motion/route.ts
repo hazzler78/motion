@@ -91,8 +91,10 @@ Använd endast ren text, inga specialtecken eller markdown.`
         }
       ],
       temperature: 0.6,
-      max_tokens: 2000,  // Minskat för att lämna mer utrymme för prompten
-      stream: true
+      max_tokens: 2000,
+      stream: true,
+      presence_penalty: 0.1,
+      frequency_penalty: 0.1
     })
 
     // Konvertera stream till ReadableStream med timeout-hantering
@@ -103,7 +105,7 @@ Använd endast ren text, inga specialtecken eller markdown.`
           const timeoutId = setTimeout(() => {
             controller.enqueue(encoder.encode("\n\n[Notering: Texten har avbrutits på grund av tidsbegränsning. Vänligen försök igen med ett kortare ämne.]"))
             controller.close()
-          }, 15000) // Ökat till 15 sekunder för att ge mer tid
+          }, 30000)
 
           let buffer = ''
           for await (const chunk of stream) {
@@ -111,14 +113,12 @@ Använd endast ren text, inga specialtecken eller markdown.`
             const content = chunk.choices[0]?.delta?.content || ''
             if (content) {
               buffer += content
-              // Skicka bufferten när den når en rimlig storlek
-              if (buffer.length > 100) {
+              if (buffer.length > 50) {
                 controller.enqueue(encoder.encode(buffer))
                 buffer = ''
               }
             }
           }
-          // Skicka eventuell återstående text i bufferten
           if (buffer) {
             controller.enqueue(encoder.encode(buffer))
           }
@@ -137,7 +137,7 @@ Använd endast ren text, inga specialtecken eller markdown.`
         'Transfer-Encoding': 'chunked',
         'Cache-Control': 'no-cache, no-transform',
         'Connection': 'keep-alive',
-        'X-Accel-Buffering': 'no' // Förhindrar buffering på server-sidan
+        'X-Accel-Buffering': 'no'
       }
     })
 
