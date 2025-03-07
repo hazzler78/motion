@@ -8,7 +8,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const envCheck = {
       BLOB_READ_WRITE_TOKEN: !!process.env.BLOB_READ_WRITE_TOKEN,
       tokenStart: process.env.BLOB_READ_WRITE_TOKEN?.substring(0, 4),
-      appUrl: process.env.NEXT_PUBLIC_APP_URL,
       nodeEnv: process.env.NODE_ENV
     }
     
@@ -21,26 +20,30 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Hämta användarinfo från Clerk
     const { userId, user } = await getAuth(request)
-    
-    // Hämta filename från query params
-    const { searchParams } = new URL(request.url)
-    const filename = searchParams.get('filename')
-    
-    if (!filename) {
-      console.error('No filename provided')
-      return new NextResponse('Filename is required', { status: 400 })
+    if (!userId) {
+      console.error('No userId found')
+      return new NextResponse('Unauthorized', { status: 401 })
     }
 
     // Hämta topic från request body
     const body = await request.json()
     const { topic } = body
 
+    if (!topic) {
+      console.error('No topic provided')
+      return new NextResponse('Topic is required', { status: 400 })
+    }
+
+    // Skapa timestamp och filnamn
+    const timestamp = new Date().toISOString()
+    const filename = `usage/${userId}/${timestamp}.json`
+
     // Skapa loggdata
     const logData = {
       userId,
       email: user?.emailAddresses?.[0]?.emailAddress || '',
       topic,
-      timestamp: new Date().toISOString(),
+      timestamp,
     }
 
     console.log('Attempting to save log:', {
@@ -48,17 +51,23 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       logData
     })
 
-    const blob = await put(filename, JSON.stringify(logData), {
-      access: 'public',
-      addRandomSuffix: true,
-    })
+    try {
+      const blob = await put(filename, JSON.stringify(logData), {
+        access: 'public',
+        addRandomSuffix: false, // Vi vill ha exakt filnamn för enklare listning
+        contentType: 'application/json'
+      })
 
-    console.log('Successfully saved to blob:', {
-      url: blob.url,
-      pathname: blob.pathname
-    })
+      console.log('Successfully saved to blob:', {
+        url: blob.url,
+        pathname: blob.pathname
+      })
 
-    return NextResponse.json(blob)
+      return NextResponse.json({ success: true, blob })
+    } catch (blobError) {
+      console.error('Error saving to blob:', blobError)
+      throw blobError
+    }
   } catch (error) {
     console.error('Error in log-usage:', error)
     if (error instanceof Error) {

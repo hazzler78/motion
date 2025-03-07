@@ -33,20 +33,8 @@ export async function POST(req: NextRequest) {
     // Logga användningen
     try {
       console.log('Attempting to log usage for topic:', topic)
-      const timestamp = new Date().toISOString()
-      const filename = `usage/${userId}/${timestamp}.json`
       
-      // Hämta origin från request för att bygga absolut URL
-      const origin = req.headers.get('origin') || 'http://localhost:3000'
-      const logUrl = `${origin}/api/log-usage?filename=${encodeURIComponent(filename)}`
-      
-      console.log('Making request to log-usage with:', {
-        url: logUrl,
-        filename,
-        topic
-      })
-
-      const logResponse = await fetch(logUrl, {
+      const logResponse = await fetch('/api/log-usage', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -55,7 +43,6 @@ export async function POST(req: NextRequest) {
       })
       
       console.log('Log usage response status:', logResponse.status)
-      console.log('Log usage response headers:', Object.fromEntries(logResponse.headers.entries()))
       
       if (!logResponse.ok) {
         const errorText = await logResponse.text()
@@ -65,8 +52,8 @@ export async function POST(req: NextRequest) {
           body: errorText
         })
       } else {
-        const blob = await logResponse.json()
-        console.log('Successfully logged usage:', blob)
+        const result = await logResponse.json()
+        console.log('Successfully logged usage:', result)
       }
     } catch (error) {
       console.error('Error logging usage:', error)
