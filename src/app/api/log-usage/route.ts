@@ -1,7 +1,6 @@
-import { auth, getAuth } from '@clerk/nextjs/server'
-import { NextResponse } from 'next/server'
+import { getAuth } from '@clerk/nextjs/server'
+import { NextResponse, NextRequest } from 'next/server'
 import { put } from '@vercel/blob'
-import { NextRequest } from 'next/server'
 
 interface LogUsageRequest {
   topic: string;
