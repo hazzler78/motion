@@ -1,6 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server'
 import { put } from '@vercel/blob'
-import { getAuth } from '@clerk/nextjs/server'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   console.log('=== Starting log-usage request ===')

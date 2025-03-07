@@ -107,10 +107,9 @@ export default async function AdminPage() {
   const totalUsers = new Set(usageLogs.map(log => log.userId)).size
   const totalUsage = usageLogs.length
 
-  // Sortera efter datum och ta de 10 senaste
-  const recentUsage = usageLogs
+  // Sortera loggarna efter datum (nyast först)
+  const sortedLogs = usageLogs
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-    .slice(0, 10)
 
   // Beräkna mest populära ämnen
   const topicCounts = usageLogs.reduce((acc, log) => {
@@ -156,7 +155,7 @@ export default async function AdminPage() {
               </tr>
             </thead>
             <tbody>
-              {usageLogs.map((log, index) => (
+              {sortedLogs.map((log, index) => (
                 <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {log.email || log.userId}
