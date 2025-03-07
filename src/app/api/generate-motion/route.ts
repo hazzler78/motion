@@ -41,8 +41,12 @@ export async function POST(req: Request) {
         body: JSON.stringify({ topic }),
       })
       console.log('Log usage response status:', logResponse.status)
+      
       if (!logResponse.ok) {
         console.error('Failed to log usage:', await logResponse.text())
+      } else {
+        const blob = await logResponse.json()
+        console.log('Successfully logged usage:', blob)
       }
     } catch (error) {
       console.error('Error logging usage:', error)

@@ -41,14 +41,14 @@ export async function POST(req: NextRequest) {
     })
 
     // Spara till Blob Storage
-    const result = await put(filename, JSON.stringify(logData), {
+    const blob = await put(filename, JSON.stringify(logData), {
       access: 'public',
       addRandomSuffix: false,
     })
 
-    console.log('Successfully saved to blob storage:', result)
+    console.log('Successfully saved to blob storage:', blob)
 
-    return new NextResponse('Usage logged successfully', { status: 200 })
+    return NextResponse.json(blob)
   } catch (error) {
     console.error('Error logging usage:', error)
     return new NextResponse('Internal Server Error', { status: 500 })
