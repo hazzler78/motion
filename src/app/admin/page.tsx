@@ -21,6 +21,7 @@ export default async function AdminPage() {
   const { blobs } = await list({
     prefix: 'usage/',
     limit: 100,
+    token: process.env.BLOB_READ_WRITE_TOKEN
   })
 
   console.log('Found blobs:', blobs.map(b => ({ url: b.url, pathname: b.pathname })))
@@ -29,14 +30,22 @@ export default async function AdminPage() {
   const usageLogs: UsageLog[] = []
   for (const blob of blobs) {
     try {
-      const response = await fetch(blob.url)
+      const response = await fetch(blob.url, {
+        headers: {
+          'Authorization': `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`
+        }
+      })
       if (!response.ok) {
         console.error(`Failed to fetch ${blob.url}:`, response.status, response.statusText)
         continue
       }
       const data = await response.json()
       console.log('Blob data:', { url: blob.url, data })
-      usageLogs.push(data)
+      if (data.userId && (data.email || data.topic)) {  // Verifiera att vi har valid data
+        usageLogs.push(data)
+      } else {
+        console.error('Invalid data structure:', data)
+      }
     } catch (error) {
       console.error(`Error fetching ${blob.url}:`, error)
     }
@@ -83,17 +92,17 @@ export default async function AdminPage() {
           <table className="min-w-full">
             <thead>
               <tr>
-                <th className="text-left">Användare</th>
-                <th className="text-left">Ämne</th>
-                <th className="text-left">Datum</th>
+                <th className="text-left p-2">Användare</th>
+                <th className="text-left p-2">Ämne</th>
+                <th className="text-left p-2">Datum</th>
               </tr>
             </thead>
             <tbody>
               {recentUsage.map((usage) => (
                 <tr key={usage.timestamp} className="hover:bg-gray-50">
-                  <td className="py-2">{usage.email || usage.userId}</td>
-                  <td className="py-2">{usage.topic}</td>
-                  <td className="py-2">{new Date(usage.timestamp).toLocaleDateString()}</td>
+                  <td className="p-2">{usage.email || usage.userId}</td>
+                  <td className="p-2">{usage.topic}</td>
+                  <td className="p-2">{new Date(usage.timestamp).toLocaleDateString('sv-SE')}</td>
                 </tr>
               ))}
             </tbody>
@@ -107,21 +116,31 @@ export default async function AdminPage() {
           <table className="min-w-full">
             <thead>
               <tr>
-                <th className="text-left">Ämne</th>
-                <th className="text-left">Antal</th>
+                <th className="text-left p-2">Ämne</th>
+                <th className="text-left p-2">Antal</th>
               </tr>
             </thead>
             <tbody>
               {topTopics.map((topic) => (
                 <tr key={topic.topic} className="hover:bg-gray-50">
-                  <td className="py-2">{topic.topic}</td>
-                  <td className="py-2">{topic.count}</td>
+                  <td className="p-2">{topic.topic}</td>
+                  <td className="p-2">{topic.count}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Debug information */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mt-8 p-4 bg-gray-100 rounded">
+          <h3 className="font-semibold mb-2">Debug Information</h3>
+          <pre className="whitespace-pre-wrap">
+            {JSON.stringify({ totalLogs: usageLogs.length, blobs: blobs.length }, null, 2)}
+          </pre>
+        </div>
+      )}
     </div>
   )
 } 
