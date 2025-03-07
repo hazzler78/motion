@@ -17,39 +17,95 @@ export default async function AdminPage() {
     redirect('/')
   }
 
-  // Hämta alla loggfiler
-  const { blobs } = await list({
-    prefix: 'usage/',
-    limit: 100,
-    token: process.env.BLOB_READ_WRITE_TOKEN
+  console.log('Starting admin page load...')
+  console.log('Environment:', {
+    hasBlobToken: !!process.env.BLOB_READ_WRITE_TOKEN,
+    tokenStart: process.env.BLOB_READ_WRITE_TOKEN?.substring(0, 4),
+    nodeEnv: process.env.NODE_ENV
   })
 
-  console.log('Found blobs:', blobs.map(b => ({ url: b.url, pathname: b.pathname })))
+  let blobs = []
+  try {
+    // Hämta alla loggfiler
+    const result = await list({
+      prefix: 'usage/',
+      limit: 100,
+      token: process.env.BLOB_READ_WRITE_TOKEN
+    })
+    blobs = result.blobs
+    console.log('Successfully listed blobs:', {
+      count: blobs.length,
+      paths: blobs.map(b => b.pathname)
+    })
+  } catch (error) {
+    console.error('Error listing blobs:', error)
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      })
+    }
+    return (
+      <div className="container mx-auto p-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <p className="font-bold">Fel vid hämtning av statistik</p>
+          <p>Kunde inte hämta användningsstatistik. Försök igen senare.</p>
+          {process.env.NODE_ENV === 'development' && (
+            <pre className="mt-2 text-sm">
+              {error instanceof Error ? error.message : 'Unknown error'}
+            </pre>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   // Läs innehållet i varje fil
   const usageLogs: UsageLog[] = []
   for (const blob of blobs) {
     try {
+      console.log('Fetching blob:', blob.url)
       const response = await fetch(blob.url, {
         headers: {
           'Authorization': `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`
         }
       })
+      
       if (!response.ok) {
-        console.error(`Failed to fetch ${blob.url}:`, response.status, response.statusText)
+        console.error('Failed to fetch blob:', {
+          url: blob.url,
+          status: response.status,
+          statusText: response.statusText
+        })
         continue
       }
-      const data = await response.json()
-      console.log('Blob data:', { url: blob.url, data })
-      if (data.userId && (data.email || data.topic)) {  // Verifiera att vi har valid data
-        usageLogs.push(data)
-      } else {
-        console.error('Invalid data structure:', data)
+
+      const text = await response.text()
+      console.log('Raw blob content:', text)
+      
+      try {
+        const data = JSON.parse(text)
+        console.log('Parsed blob data:', data)
+        
+        if (data.userId && (data.email || data.topic)) {
+          usageLogs.push(data)
+          console.log('Added log entry:', data)
+        } else {
+          console.error('Invalid data structure:', data)
+        }
+      } catch (parseError) {
+        console.error('Error parsing blob data:', parseError)
       }
     } catch (error) {
-      console.error(`Error fetching ${blob.url}:`, error)
+      console.error('Error fetching blob:', error)
     }
   }
+
+  console.log('Final usage logs:', {
+    count: usageLogs.length,
+    logs: usageLogs
+  })
 
   // Beräkna statistik
   const totalUsers = new Set(usageLogs.map(log => log.userId)).size
@@ -137,7 +193,15 @@ export default async function AdminPage() {
         <div className="mt-8 p-4 bg-gray-100 rounded">
           <h3 className="font-semibold mb-2">Debug Information</h3>
           <pre className="whitespace-pre-wrap">
-            {JSON.stringify({ totalLogs: usageLogs.length, blobs: blobs.length }, null, 2)}
+            {JSON.stringify({
+              environment: {
+                hasBlobToken: !!process.env.BLOB_READ_WRITE_TOKEN,
+                nodeEnv: process.env.NODE_ENV
+              },
+              blobs: blobs.length,
+              totalLogs: usageLogs.length,
+              logs: usageLogs
+            }, null, 2)}
           </pre>
         </div>
       )}
