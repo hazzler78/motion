@@ -2,12 +2,10 @@ import { getAuth } from '@clerk/nextjs/server'
 import { NextResponse, NextRequest } from 'next/server'
 import { put } from '@vercel/blob'
 
-interface LogUsageRequest {
-  topic: string;
-}
-
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    console.log('Starting log usage request...')
+    
     const { userId, user } = await getAuth(request)
     
     if (!userId) {
@@ -15,23 +13,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    const { topic } = await request.json() as LogUsageRequest
+    const { searchParams } = new URL(request.url)
+    const filename = searchParams.get('filename')
 
-    if (!topic) {
-      console.log('No topic provided in request')
-      return new NextResponse('Topic is required', { status: 400 })
+    if (!filename) {
+      console.log('No filename provided')
+      return new NextResponse('Filename is required', { status: 400 })
     }
-
-    // Skapa en unik filnamn med timestamp
-    const timestamp = new Date().toISOString()
-    const filename = `usage/${userId}/${timestamp}.json`
 
     // Skapa loggdata
     const logData = {
       userId,
       email: user?.emailAddresses?.[0]?.emailAddress || '',
-      topic,
-      timestamp,
+      timestamp: new Date().toISOString(),
     }
 
     console.log('Attempting to save log data:', {
@@ -40,10 +34,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       hasEmail: !!user?.emailAddresses?.[0]?.emailAddress
     })
 
-    // Spara till Blob Storage med request.body
+    // Spara till Blob Storage
     const blob = await put(filename, JSON.stringify(logData), {
       access: 'public',
-      addRandomSuffix: false,
     })
 
     console.log('Successfully saved to blob storage:', blob)

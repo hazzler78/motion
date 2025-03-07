@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs'
-import { NextResponse } from 'next/server'
+import { getAuth } from '@clerk/nextjs/server'
+import { NextResponse, NextRequest } from 'next/server'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({
@@ -16,11 +17,11 @@ interface GenerateMotionRequest {
   topic: string;
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const session = await auth()
+    const { userId, user } = await getAuth(req)
     
-    if (!session?.userId) {
+    if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
@@ -33,13 +34,17 @@ export async function POST(req: Request) {
     // Logga användningen
     try {
       console.log('Attempting to log usage for topic:', topic)
-      const logResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/log-usage`, {
+      const timestamp = new Date().toISOString()
+      const filename = `usage/${userId}/${timestamp}.json`
+      
+      const logResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/log-usage?filename=${encodeURIComponent(filename)}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ topic }),
       })
+      
       console.log('Log usage response status:', logResponse.status)
       
       if (!logResponse.ok) {
