@@ -36,6 +36,12 @@ export async function POST(req: NextRequest) {
       const timestamp = new Date().toISOString()
       const filename = `usage/${userId}/${timestamp}.json`
       
+      console.log('Making request to log-usage with:', {
+        url: `${process.env.NEXT_PUBLIC_APP_URL}/api/log-usage?filename=${encodeURIComponent(filename)}`,
+        hasAppUrl: !!process.env.NEXT_PUBLIC_APP_URL,
+        filename
+      })
+
       const logResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/log-usage?filename=${encodeURIComponent(filename)}`, {
         method: 'POST',
         headers: {
@@ -45,15 +51,28 @@ export async function POST(req: NextRequest) {
       })
       
       console.log('Log usage response status:', logResponse.status)
+      console.log('Log usage response headers:', Object.fromEntries(logResponse.headers.entries()))
       
       if (!logResponse.ok) {
-        console.error('Failed to log usage:', await logResponse.text())
+        const errorText = await logResponse.text()
+        console.error('Failed to log usage:', {
+          status: logResponse.status,
+          statusText: logResponse.statusText,
+          body: errorText
+        })
       } else {
         const blob = await logResponse.json()
         console.log('Successfully logged usage:', blob)
       }
     } catch (error) {
       console.error('Error logging usage:', error)
+      if (error instanceof Error) {
+        console.error('Error details:', {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        })
+      }
       // Fortsätt ändå med genereringen även om loggningen misslyckas
     }
 

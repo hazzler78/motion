@@ -5,67 +5,61 @@ import { put } from '@vercel/blob'
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     console.log('Starting log usage request...')
-    console.log('Request URL:', request.url)
-    console.log('Request headers:', Object.fromEntries(request.headers.entries()))
     
+    // Först, logga miljövariabler
+    console.log('Environment variables:', {
+      hasBlobToken: !!process.env.BLOB_READ_WRITE_TOKEN,
+      tokenFirstChars: process.env.BLOB_READ_WRITE_TOKEN ? process.env.BLOB_READ_WRITE_TOKEN.substring(0, 4) + '...' : 'missing',
+      appUrl: process.env.NEXT_PUBLIC_APP_URL,
+      nodeEnv: process.env.NODE_ENV
+    })
+
+    // Testa att spara en enkel testfil först
+    try {
+      console.log('Testing blob storage with simple file...')
+      const testBlob = await put('test.txt', 'Hello World', {
+        access: 'public',
+        addRandomSuffix: true,
+      })
+      console.log('Test blob created successfully:', testBlob)
+    } catch (testError) {
+      console.error('Test blob creation failed:', testError)
+      return new NextResponse('Blob Storage test failed', { status: 500 })
+    }
+
+    // Om testfilen fungerade, fortsätt med den riktiga implementationen
     const { userId, user } = await getAuth(request)
-    
     if (!userId) {
-      console.log('No userId found in request')
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
     const filename = searchParams.get('filename')
-    console.log('Filename from query params:', filename)
-
     if (!filename) {
-      console.log('No filename provided')
       return new NextResponse('Filename is required', { status: 400 })
     }
 
-    // Skapa loggdata
     const logData = {
       userId,
       email: user?.emailAddresses?.[0]?.emailAddress || '',
       timestamp: new Date().toISOString(),
     }
 
-    console.log('Attempting to save log data:', {
-      filename,
-      logData,
-      hasEmail: !!user?.emailAddresses?.[0]?.emailAddress,
-      blobToken: process.env.BLOB_READ_WRITE_TOKEN ? 'exists' : 'missing'
+    const blob = await put(filename, JSON.stringify(logData), {
+      access: 'public',
+      addRandomSuffix: true,
     })
 
-    try {
-      // Spara till Blob Storage
-      console.log('Calling put with options:', {
-        access: 'public',
-        addRandomSuffix: false
-      })
-      
-      const blob = await put(filename, JSON.stringify(logData), {
-        access: 'public',
-        addRandomSuffix: false,
-      })
-
-      console.log('Successfully saved to blob storage:', blob)
-
-      return NextResponse.json(blob)
-    } catch (blobError: unknown) {
-      console.error('Error saving to blob storage:', blobError)
-      if (blobError instanceof Error) {
-        console.error('Error details:', {
-          name: blobError.name,
-          message: blobError.message,
-          stack: blobError.stack
-        })
-      }
-      throw blobError
-    }
+    return NextResponse.json(blob)
   } catch (error) {
-    console.error('Error logging usage:', error)
+    console.error('Error in log-usage:', error)
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      })
+    }
     return new NextResponse('Internal Server Error', { status: 500 })
   }
 } 
