@@ -23,13 +23,24 @@ export default async function AdminPage() {
     limit: 100,
   })
 
+  console.log('Found blobs:', blobs.map(b => ({ url: b.url, pathname: b.pathname })))
+
   // Läs innehållet i varje fil
-  const usageLogs: UsageLog[] = await Promise.all(
-    blobs.map(async (blob) => {
+  const usageLogs: UsageLog[] = []
+  for (const blob of blobs) {
+    try {
       const response = await fetch(blob.url)
-      return response.json()
-    })
-  )
+      if (!response.ok) {
+        console.error(`Failed to fetch ${blob.url}:`, response.status, response.statusText)
+        continue
+      }
+      const data = await response.json()
+      console.log('Blob data:', { url: blob.url, data })
+      usageLogs.push(data)
+    } catch (error) {
+      console.error(`Error fetching ${blob.url}:`, error)
+    }
+  }
 
   // Beräkna statistik
   const totalUsers = new Set(usageLogs.map(log => log.userId)).size
@@ -79,10 +90,10 @@ export default async function AdminPage() {
             </thead>
             <tbody>
               {recentUsage.map((usage) => (
-                <tr key={usage.timestamp}>
-                  <td>{usage.email}</td>
-                  <td>{usage.topic}</td>
-                  <td>{new Date(usage.timestamp).toLocaleDateString()}</td>
+                <tr key={usage.timestamp} className="hover:bg-gray-50">
+                  <td className="py-2">{usage.email || usage.userId}</td>
+                  <td className="py-2">{usage.topic}</td>
+                  <td className="py-2">{new Date(usage.timestamp).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>
@@ -102,9 +113,9 @@ export default async function AdminPage() {
             </thead>
             <tbody>
               {topTopics.map((topic) => (
-                <tr key={topic.topic}>
-                  <td>{topic.topic}</td>
-                  <td>{topic.count}</td>
+                <tr key={topic.topic} className="hover:bg-gray-50">
+                  <td className="py-2">{topic.topic}</td>
+                  <td className="py-2">{topic.count}</td>
                 </tr>
               ))}
             </tbody>
