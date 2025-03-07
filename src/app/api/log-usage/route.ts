@@ -35,8 +35,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // Skapa timestamp och filnamn
-    const timestamp = new Date().toISOString()
-    const filename = `usage/${userId}/${timestamp}.json`
+    const now = new Date()
+    const timestamp = now.toISOString()
+    const sanitizedTimestamp = timestamp.replace(/[:.]/g, '-')
+    const filename = `usage/${sanitizedTimestamp}.json`
 
     // Skapa loggdata
     const logData = {
@@ -54,7 +56,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     try {
       const blob = await put(filename, JSON.stringify(logData), {
         access: 'public',
-        addRandomSuffix: false, // Vi vill ha exakt filnamn för enklare listning
+        addRandomSuffix: false,
         contentType: 'application/json'
       })
 

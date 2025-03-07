@@ -66,11 +66,7 @@ export default async function AdminPage() {
   for (const blob of blobs) {
     try {
       console.log('Fetching blob:', blob.url)
-      const response = await fetch(blob.url, {
-        headers: {
-          'Authorization': `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`
-        }
-      })
+      const response = await fetch(blob.url)
       
       if (!response.ok) {
         console.error('Failed to fetch blob:', {
