@@ -4,30 +4,51 @@ import { put } from '@vercel/blob'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    console.log('Starting log usage request...')
-    
-    // Först, logga miljövariabler
-    console.log('Environment variables:', {
-      hasBlobToken: !!process.env.BLOB_READ_WRITE_TOKEN,
-      tokenFirstChars: process.env.BLOB_READ_WRITE_TOKEN ? process.env.BLOB_READ_WRITE_TOKEN.substring(0, 4) + '...' : 'missing',
+    // Verifiera miljövariabler först
+    const envCheck = {
+      BLOB_READ_WRITE_TOKEN: !!process.env.BLOB_READ_WRITE_TOKEN,
+      tokenStart: process.env.BLOB_READ_WRITE_TOKEN?.substring(0, 4),
       appUrl: process.env.NEXT_PUBLIC_APP_URL,
       nodeEnv: process.env.NODE_ENV
-    })
+    }
+    
+    console.log('Environment check:', envCheck)
 
-    // Testa att spara en enkel testfil först
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      console.error('Missing BLOB_READ_WRITE_TOKEN')
+      return new NextResponse('Blob Storage not configured', { status: 500 })
+    }
+
+    // Testa blob storage med en enkel fil
+    const testContent = {
+      test: true,
+      timestamp: new Date().toISOString()
+    }
+
     try {
-      console.log('Testing blob storage with simple file...')
-      const testBlob = await put('test.txt', 'Hello World', {
+      console.log('Testing blob storage...')
+      const testBlob = await put(`test-${Date.now()}.json`, JSON.stringify(testContent), {
         access: 'public',
         addRandomSuffix: true,
       })
-      console.log('Test blob created successfully:', testBlob)
+      console.log('Test successful:', {
+        url: testBlob.url,
+        pathname: testBlob.pathname,
+        contentType: testBlob.contentType
+      })
     } catch (testError) {
-      console.error('Test blob creation failed:', testError)
+      console.error('Blob test failed:', testError)
+      if (testError instanceof Error) {
+        console.error('Test error details:', {
+          name: testError.name,
+          message: testError.message,
+          stack: testError.stack
+        })
+      }
       return new NextResponse('Blob Storage test failed', { status: 500 })
     }
 
-    // Om testfilen fungerade, fortsätt med den riktiga implementationen
+    // Om vi kommer hit fungerade testet, fortsätt med den vanliga implementationen
     const { userId, user } = await getAuth(request)
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 })
