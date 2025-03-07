@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server'
 import { put } from '@vercel/blob'
+import { getAuth } from '@clerk/nextjs/server'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
@@ -18,7 +19,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return new NextResponse('Blob Storage not configured', { status: 500 })
     }
 
-    // Hämta filename och userId från query params
+    // Hämta användarinfo från Clerk
+    const { userId, user } = await getAuth(request)
+    
+    // Hämta filename från query params
     const { searchParams } = new URL(request.url)
     const filename = searchParams.get('filename')
     
@@ -33,6 +37,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Skapa loggdata
     const logData = {
+      userId,
+      email: user?.emailAddresses?.[0]?.emailAddress || '',
       topic,
       timestamp: new Date().toISOString(),
     }
