@@ -30,6 +30,20 @@ export async function POST(req: Request) {
       return new NextResponse('Valid topic is required', { status: 400 })
     }
 
+    // Logga användningen
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/log-usage`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ topic }),
+      })
+    } catch (error) {
+      console.error('Error logging usage:', error)
+      // Fortsätt ändå med genereringen även om loggningen misslyckas
+    }
+
     const systemPrompt = `Du är en erfaren politisk sekreterare för Sverigedemokraterna i Värmland med över 10 års erfarenhet av att skriva motioner. Du känner partiets värderingar och retorik inifrån och ut.
 
 PARTIETS VÄRDERINGAR:
