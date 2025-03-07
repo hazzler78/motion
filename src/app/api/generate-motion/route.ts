@@ -36,13 +36,17 @@ export async function POST(req: NextRequest) {
       const timestamp = new Date().toISOString()
       const filename = `usage/${userId}/${timestamp}.json`
       
+      // Hämta origin från request för att bygga absolut URL
+      const origin = req.headers.get('origin') || 'http://localhost:3000'
+      const logUrl = `${origin}/api/log-usage?filename=${encodeURIComponent(filename)}`
+      
       console.log('Making request to log-usage with:', {
-        url: `${process.env.NEXT_PUBLIC_APP_URL}/api/log-usage?filename=${encodeURIComponent(filename)}`,
-        hasAppUrl: !!process.env.NEXT_PUBLIC_APP_URL,
-        filename
+        url: logUrl,
+        filename,
+        topic
       })
 
-      const logResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/log-usage?filename=${encodeURIComponent(filename)}`, {
+      const logResponse = await fetch(logUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

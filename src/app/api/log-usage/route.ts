@@ -1,4 +1,3 @@
-import { getAuth } from '@clerk/nextjs/server'
 import { NextResponse, NextRequest } from 'next/server'
 import { put } from '@vercel/blob'
 
@@ -19,56 +18,38 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return new NextResponse('Blob Storage not configured', { status: 500 })
     }
 
-    // Testa blob storage med en enkel fil
-    const testContent = {
-      test: true,
-      timestamp: new Date().toISOString()
-    }
-
-    try {
-      console.log('Testing blob storage...')
-      const testBlob = await put(`test-${Date.now()}.json`, JSON.stringify(testContent), {
-        access: 'public',
-        addRandomSuffix: true,
-      })
-      console.log('Test successful:', {
-        url: testBlob.url,
-        pathname: testBlob.pathname,
-        contentType: testBlob.contentType
-      })
-    } catch (testError) {
-      console.error('Blob test failed:', testError)
-      if (testError instanceof Error) {
-        console.error('Test error details:', {
-          name: testError.name,
-          message: testError.message,
-          stack: testError.stack
-        })
-      }
-      return new NextResponse('Blob Storage test failed', { status: 500 })
-    }
-
-    // Om vi kommer hit fungerade testet, fortsätt med den vanliga implementationen
-    const { userId, user } = await getAuth(request)
-    if (!userId) {
-      return new NextResponse('Unauthorized', { status: 401 })
-    }
-
+    // Hämta filename och userId från query params
     const { searchParams } = new URL(request.url)
     const filename = searchParams.get('filename')
+    
     if (!filename) {
+      console.error('No filename provided')
       return new NextResponse('Filename is required', { status: 400 })
     }
 
+    // Hämta topic från request body
+    const body = await request.json()
+    const { topic } = body
+
+    // Skapa loggdata
     const logData = {
-      userId,
-      email: user?.emailAddresses?.[0]?.emailAddress || '',
+      topic,
       timestamp: new Date().toISOString(),
     }
+
+    console.log('Attempting to save log:', {
+      filename,
+      logData
+    })
 
     const blob = await put(filename, JSON.stringify(logData), {
       access: 'public',
       addRandomSuffix: true,
+    })
+
+    console.log('Successfully saved to blob:', {
+      url: blob.url,
+      pathname: blob.pathname
     })
 
     return NextResponse.json(blob)
