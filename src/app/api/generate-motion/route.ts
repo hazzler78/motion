@@ -1,4 +1,3 @@
-import { auth } from '@clerk/nextjs'
 import { getAuth } from '@clerk/nextjs/server'
 import { NextResponse, NextRequest } from 'next/server'
 import OpenAI from 'openai'
@@ -19,7 +18,7 @@ interface GenerateMotionRequest {
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId, user } = await getAuth(req)
+    const { userId } = await getAuth(req)
     
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 })
