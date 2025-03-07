@@ -34,15 +34,34 @@ export async function POST(req: NextRequest) {
     try {
       console.log('Attempting to log usage for topic:', topic)
       
-      const logResponse = await fetch('/api/log-usage', {
+      // Använd absolut URL för att vara säker
+      const origin = process.env.VERCEL_URL 
+        ? `https://${process.env.VERCEL_URL}` 
+        : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+      
+      const logUrl = `${origin}/api/log-usage`
+      
+      console.log('Making log request to:', {
+        url: logUrl,
+        topic,
+        userId
+      })
+
+      const logResponse = await fetch(logUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          // Skicka med auth-headern för att behålla Clerk-sessionen
+          'Cookie': req.headers.get('cookie') || '',
         },
         body: JSON.stringify({ topic }),
       })
       
-      console.log('Log usage response status:', logResponse.status)
+      console.log('Log usage response:', {
+        status: logResponse.status,
+        statusText: logResponse.statusText,
+        headers: Object.fromEntries(logResponse.headers.entries())
+      })
       
       if (!logResponse.ok) {
         const errorText = await logResponse.text()

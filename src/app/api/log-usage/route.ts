@@ -3,12 +3,15 @@ import { put } from '@vercel/blob'
 import { getAuth } from '@clerk/nextjs/server'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  console.log('=== Starting log-usage request ===')
+  
   try {
     // Verifiera miljövariabler först
     const envCheck = {
       BLOB_READ_WRITE_TOKEN: !!process.env.BLOB_READ_WRITE_TOKEN,
       tokenStart: process.env.BLOB_READ_WRITE_TOKEN?.substring(0, 4),
-      nodeEnv: process.env.NODE_ENV
+      nodeEnv: process.env.NODE_ENV,
+      vercelUrl: process.env.VERCEL_URL
     }
     
     console.log('Environment check:', envCheck)
@@ -18,15 +21,27 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return new NextResponse('Blob Storage not configured', { status: 500 })
     }
 
+    // Logga request headers för felsökning
+    console.log('Request headers:', {
+      cookie: request.headers.get('cookie'),
+      contentType: request.headers.get('content-type'),
+      host: request.headers.get('host')
+    })
+
     // Hämta användarinfo från Clerk
+    console.log('Getting auth info...')
     const { userId, user } = await getAuth(request)
+    console.log('Auth result:', { userId, hasUser: !!user })
+
     if (!userId) {
       console.error('No userId found')
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
     // Hämta topic från request body
+    console.log('Parsing request body...')
     const body = await request.json()
+    console.log('Request body:', body)
     const { topic } = body
 
     if (!topic) {
@@ -54,6 +69,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     })
 
     try {
+      console.log('Calling Vercel Blob put...')
       const blob = await put(filename, JSON.stringify(logData), {
         access: 'public',
         addRandomSuffix: false,
@@ -68,6 +84,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ success: true, blob })
     } catch (blobError) {
       console.error('Error saving to blob:', blobError)
+      if (blobError instanceof Error) {
+        console.error('Blob error details:', {
+          name: blobError.name,
+          message: blobError.message,
+          stack: blobError.stack
+        })
+      }
       throw blobError
     }
   } catch (error) {
