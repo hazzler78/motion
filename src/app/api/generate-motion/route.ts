@@ -32,13 +32,18 @@ export async function POST(req: Request) {
 
     // Logga användningen
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/log-usage`, {
+      console.log('Attempting to log usage for topic:', topic)
+      const logResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/log-usage`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ topic }),
       })
+      console.log('Log usage response status:', logResponse.status)
+      if (!logResponse.ok) {
+        console.error('Failed to log usage:', await logResponse.text())
+      }
     } catch (error) {
       console.error('Error logging usage:', error)
       // Fortsätt ändå med genereringen även om loggningen misslyckas

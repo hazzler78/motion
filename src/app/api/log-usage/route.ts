@@ -11,12 +11,14 @@ export async function POST(req: NextRequest) {
     const { userId, user } = await getAuth(req)
     
     if (!userId) {
+      console.log('No userId found in request')
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
     const { topic } = await req.json() as LogUsageRequest
 
     if (!topic) {
+      console.log('No topic provided in request')
       return new NextResponse('Topic is required', { status: 400 })
     }
 
@@ -32,11 +34,19 @@ export async function POST(req: NextRequest) {
       timestamp,
     }
 
+    console.log('Attempting to save log data:', {
+      filename,
+      logData,
+      hasEmail: !!user?.emailAddresses?.[0]?.emailAddress
+    })
+
     // Spara till Blob Storage
-    await put(filename, JSON.stringify(logData), {
+    const result = await put(filename, JSON.stringify(logData), {
       access: 'public',
       addRandomSuffix: false,
     })
+
+    console.log('Successfully saved to blob storage:', result)
 
     return new NextResponse('Usage logged successfully', { status: 200 })
   } catch (error) {
