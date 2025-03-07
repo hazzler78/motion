@@ -21,32 +21,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return new NextResponse('Blob Storage not configured', { status: 500 })
     }
 
-    // Logga request headers för felsökning
-    console.log('Request headers:', {
-      cookie: request.headers.get('cookie'),
-      contentType: request.headers.get('content-type'),
-      host: request.headers.get('host')
-    })
-
-    // Hämta användarinfo från Clerk
-    console.log('Getting auth info...')
-    const { userId, user } = await getAuth(request)
-    console.log('Auth result:', { userId, hasUser: !!user })
-
-    if (!userId) {
-      console.error('No userId found')
-      return new NextResponse('Unauthorized', { status: 401 })
-    }
-
-    // Hämta topic från request body
+    // Hämta data från request body
     console.log('Parsing request body...')
     const body = await request.json()
     console.log('Request body:', body)
-    const { topic } = body
+    const { topic, email } = body
 
-    if (!topic) {
-      console.error('No topic provided')
-      return new NextResponse('Topic is required', { status: 400 })
+    if (!topic || !email) {
+      console.error('Missing required fields:', { hasTopic: !!topic, hasEmail: !!email })
+      return new NextResponse('Topic and email are required', { status: 400 })
     }
 
     // Skapa timestamp och filnamn
@@ -55,10 +38,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const sanitizedTimestamp = timestamp.replace(/[:.]/g, '-')
     const filename = `usage/${sanitizedTimestamp}.json`
 
-    // Skapa loggdata
+    // Skapa loggdata - spara både userId och email för bakåtkompatibilitet
     const logData = {
-      userId,
-      email: user?.emailAddresses?.[0]?.emailAddress || '',
+      userId: email, // För bakåtkompatibilitet
+      email,
       topic,
       timestamp,
     }

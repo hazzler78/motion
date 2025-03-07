@@ -1,4 +1,5 @@
 import { getAuth } from '@clerk/nextjs/server'
+import { clerkClient } from '@clerk/nextjs/server'
 import { NextResponse, NextRequest } from 'next/server'
 import OpenAI from 'openai'
 
@@ -24,6 +25,16 @@ export async function POST(req: NextRequest) {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
+    // Hämta användarinformation från Clerk
+    const user = await clerkClient.users.getUser(userId)
+    const email = user.emailAddresses[0]?.emailAddress
+
+    console.log('User details:', {
+      userId,
+      email,
+      hasEmailAddresses: user.emailAddresses.length > 0
+    })
+
     const { topic } = await req.json() as GenerateMotionRequest
 
     if (!topic || topic.trim().length < 5) {
@@ -35,26 +46,29 @@ export async function POST(req: NextRequest) {
       console.log('Attempting to log usage for topic:', topic)
       
       // Använd absolut URL för att vara säker
-      const origin = process.env.VERCEL_URL 
-        ? `https://${process.env.VERCEL_URL}` 
-        : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+      const origin = process.env.NODE_ENV === 'production'
+        ? `https://${process.env.VERCEL_URL}`
+        : 'http://localhost:3000'
       
       const logUrl = `${origin}/api/log-usage`
       
       console.log('Making log request to:', {
         url: logUrl,
         topic,
-        userId
+        email: email || userId, // Använd userId som fallback
+        nodeEnv: process.env.NODE_ENV,
+        vercelUrl: process.env.VERCEL_URL
       })
 
       const logResponse = await fetch(logUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          // Skicka med auth-headern för att behålla Clerk-sessionen
-          'Cookie': req.headers.get('cookie') || '',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ topic }),
+        body: JSON.stringify({ 
+          topic,
+          email: email || userId // Använd userId som fallback
+        }),
       })
       
       console.log('Log usage response:', {

@@ -141,20 +141,32 @@ export default async function AdminPage() {
       <div className="bg-white p-4 rounded-lg shadow mb-8">
         <h2 className="text-lg font-semibold mb-4">Senaste användningen</h2>
         <div className="overflow-x-auto">
-          <table className="min-w-full">
+          <table className="min-w-full bg-white">
             <thead>
               <tr>
-                <th className="text-left p-2">Användare</th>
-                <th className="text-left p-2">Ämne</th>
-                <th className="text-left p-2">Datum</th>
+                <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Användare
+                </th>
+                <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Ämne
+                </th>
+                <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Tidpunkt
+                </th>
               </tr>
             </thead>
             <tbody>
-              {recentUsage.map((usage) => (
-                <tr key={usage.timestamp} className="hover:bg-gray-50">
-                  <td className="p-2">{usage.email || usage.userId}</td>
-                  <td className="p-2">{usage.topic}</td>
-                  <td className="p-2">{new Date(usage.timestamp).toLocaleDateString('sv-SE')}</td>
+              {usageLogs.map((log, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {log.email || log.userId}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {log.topic}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {new Date(log.timestamp).toLocaleString('sv-SE')}
+                  </td>
                 </tr>
               ))}
             </tbody>
