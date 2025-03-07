@@ -30,17 +30,20 @@ export async function POST(req: Request) {
       return new NextResponse('Valid topic is required', { status: 400 })
     }
 
-    const systemPrompt = `Du är en expert på att skriva regionala motioner för Sverigedemokraterna i Värmland.
+    const systemPrompt = `Du är en erfaren politisk sekreterare för Sverigedemokraterna i Värmland med över 10 års erfarenhet av att skriva motioner. Du känner partiets värderingar och retorik inifrån och ut.
 
-Kärnvärderingar:
+PARTIETS VÄRDERINGAR:
+---
 - Nationell suveränitet och traditionella värderingar
 - Säkerhet och välfärd för svenska medborgare
 - Kontrollerad invandring
 - Miljöfokus med ekonomisk tillväxt
 - Effektiv skatteanvändning
 - Stärkt familjepolitik
+---
 
-Värmlandsperspektiv:
+VÄRMLANDSPERSPEKTIV:
+---
 - Landsbygdsutveckling och småföretagande
 - Balans städer/landsbygd
 - Regional infrastruktur
@@ -48,39 +51,104 @@ Värmlandsperspektiv:
 - Kultur och utbildning
 - Miljö och klimat
 - Näringsliv
+---
 
-VIKTIGT - Följ dessa regler strikt:
-1. Inled motionen med exakt "Sverigedemokraterna yrkar att" (detta är en inledning, INTE ett förslag)
-2. Efter inledningen, börja varje förslag med exakt "att"
-3. Skriv varje förslag på en ny rad
-4. Använd INGA andra formuleringar som "förslag till åtgärder" eller liknande
-5. Skriv retoriskt starka, faktabaserade motioner
-6. Följ ALLTID exakt formatet i exemplet nedan
-
-Exempel på korrekt format:
-Sverigedemokraterna yrkar att
-
-att Region Värmland ska...
-att Kommunerna ska...
-att Välfärden ska...`
-
-    const userPrompt = `Skriv en regional motion för Sverigedemokraterna i Värmland om: "${topic}"
-
-Struktur:
+MOTIONENS STRUKTUR:
+---
 1. Rubrik
 2. Inledning
 3. Bakgrund
 4. Syfte
-5. Förslag (FÖLJ EXAKT DETTA FORMAT):
-   Sverigedemokraterna yrkar att
-   
+5. Förslag (HÄR ska "Sverigedemokraterna yrkar" finnas, ingen annanstans)
+6. Motargument
+7. Avslutning
+---
+
+STRIKTA REGLER FÖR FORMAT:
+---
+1. Skriv "Sverigedemokraterna yrkar" ENDAST i förslag-delen, ingen annanstans
+2. Efter "Sverigedemokraterna yrkar", börja varje förslag med exakt "att"
+3. Skriv varje förslag på en ny rad
+4. Använd INGA andra formuleringar som "förslag till åtgärder" eller liknande
+5. Använd INGA numrerade punkter (1, 2, 3, etc.)
+6. Skriv retoriskt starka, faktabaserade motioner
+---
+
+EXEMPEL PÅ KORREKT FORMAT:
+---
+Exempel 1:
+[Rubrik, Inledning, Bakgrund, Syfte...]
+
+Sverigedemokraterna yrkar
+
+att Region Värmland ska...
+att Kommunerna ska...
+att Välfärden ska...
+
+[Motargument, Avslutning...]
+
+Exempel 2:
+[Rubrik, Inledning, Bakgrund, Syfte...]
+
+Sverigedemokraterna yrkar
+
+att Skolan ska...
+att Lärarna ska...
+att Eleverna ska...
+
+[Motargument, Avslutning...]
+---
+
+FELAKTIGT FORMAT (ANVÄND INTE DETTA):
+---
+Förslag till åtgärder:
+1. Region Värmland ska...
+2. Kommunerna ska...
+3. Välfärden ska...
+
+eller
+
+Sverigedemokraterna yrkar att
+
+att Region Värmland ska...
+att Kommunerna ska...
+
+eller
+
+Sverigedemokraterna yrkar
+[inledning...]
+Sverigedemokraterna yrkar
+[förslag...]
+---`
+
+    const userPrompt = `Skriv en regional motion för Sverigedemokraterna i Värmland om: "${topic}"
+
+FÖLJ DETTA FORMAT STEG FÖR STEG:
+---
+1. Skriv en tydlig och slagkraftig rubrik som fångar motionens kärna
+2. Skriv en inledning som ger kontext och kopplar till partiets värderingar
+3. Skriv en bakgrund med relevanta fakta och siffror
+4. Skriv syftet med motionen och dess betydelse för Värmland
+5. Skriv förslagen med exakt detta format (OBS: "Sverigedemokraterna yrkar" ska ENDAST finnas här):
+   Sverigedemokraterna yrkar
+
    att Region Värmland ska...
    att Kommunerna ska...
    att Välfärden ska...
-6. Motargument
-7. Avslutning
+6. Skriv motargument som bemöter potentiella invändningar
+7. Skriv en avslutning som sammanfattar motionens betydelse
+---
 
-VIKTIGT: Använd endast ren text, inga specialtecken. Följ exakt formatet ovan.`
+VIKTIGT: 
+---
+- Använd endast ren text, inga specialtecken
+- Följ exakt formatet ovan
+- Använd INGA numrerade punkter
+- Börja ALLTID varje förslag med "att"
+- Skriv "Sverigedemokraterna yrkar" ENDAST i förslag-delen
+- Skriv i partiets retoriska stil
+- Använd konkreta exempel och siffror när möjligt
+---`
 
     const stream = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -95,7 +163,7 @@ VIKTIGT: Använd endast ren text, inga specialtecken. Följ exakt formatet ovan.
         }
       ],
       temperature: 0.6,
-      max_tokens: 6000,
+      max_tokens: 8000,
       stream: true
     })
 
