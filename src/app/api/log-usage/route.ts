@@ -6,16 +6,16 @@ interface LogUsageRequest {
   topic: string;
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const { userId, user } = await getAuth(req)
+    const { userId, user } = await getAuth(request)
     
     if (!userId) {
       console.log('No userId found in request')
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    const { topic } = await req.json() as LogUsageRequest
+    const { topic } = await request.json() as LogUsageRequest
 
     if (!topic) {
       console.log('No topic provided in request')
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       hasEmail: !!user?.emailAddresses?.[0]?.emailAddress
     })
 
-    // Spara till Blob Storage
+    // Spara till Blob Storage med request.body
     const blob = await put(filename, JSON.stringify(logData), {
       access: 'public',
       addRandomSuffix: false,
