@@ -53,15 +53,15 @@ VÄRMLANDSPERSPEKTIV:
 - Näringsliv
 ---
 
-MOTIONENS STRUKTUR:
+MOTIONENS STRUKTUR (SKRIV UTAN RUBRIKER):
 ---
-1. Rubrik
-2. Inledning
-3. Bakgrund
-4. Syfte
-5. Förslag (HÄR ska "Sverigedemokraterna yrkar" finnas, ingen annanstans)
-6. Motargument
-7. Avslutning
+1. Skriv en tydlig och slagkraftig rubrik som fångar motionens kärna
+2. Skriv en inledning som ger kontext och kopplar till partiets värderingar
+3. Skriv en bakgrund med relevanta fakta och siffror
+4. Skriv syftet med motionen och dess betydelse för Värmland
+5. Skriv förslagen med exakt detta format (OBS: "Sverigedemokraterna yrkar" ska ENDAST finnas här)
+6. Skriv motargument som bemöter potentiella invändningar
+7. Skriv en avslutning som sammanfattar motionens betydelse
 ---
 
 STRIKTA REGLER FÖR FORMAT:
@@ -72,12 +72,17 @@ STRIKTA REGLER FÖR FORMAT:
 4. Använd INGA andra formuleringar som "förslag till åtgärder" eller liknande
 5. Använd INGA numrerade punkter (1, 2, 3, etc.)
 6. Skriv retoriskt starka, faktabaserade motioner
+7. Skriv UTAN rubriker som "Rubrik:", "Inledning:", etc.
 ---
 
 EXEMPEL PÅ KORREKT FORMAT:
 ---
 Exempel 1:
-[Rubrik, Inledning, Bakgrund, Syfte...]
+Anställ en återvandringshandläggare för en tryggare framtid i Värmland
+
+I en tid där det svenska välfärdssystemet är under press...
+
+[Inledning, Bakgrund, Syfte...]
 
 Sverigedemokraterna yrkar
 
@@ -88,7 +93,11 @@ att Välfärden ska...
 [Motargument, Avslutning...]
 
 Exempel 2:
-[Rubrik, Inledning, Bakgrund, Syfte...]
+Stärk skolan för en bättre framtid i Värmland
+
+I en tid där utbildningens kvalitet är avgörande...
+
+[Inledning, Bakgrund, Syfte...]
 
 Sverigedemokraterna yrkar
 
@@ -101,10 +110,10 @@ att Eleverna ska...
 
 FELAKTIGT FORMAT (ANVÄND INTE DETTA):
 ---
-Förslag till åtgärder:
-1. Region Värmland ska...
-2. Kommunerna ska...
-3. Välfärden ska...
+Rubrik: Förslag till åtgärder
+Inledning: 1. Region Värmland ska...
+Bakgrund: 2. Kommunerna ska...
+Syfte: 3. Välfärden ska...
 
 eller
 
@@ -123,7 +132,7 @@ Sverigedemokraterna yrkar
 
     const userPrompt = `Skriv en regional motion för Sverigedemokraterna i Värmland om: "${topic}"
 
-FÖLJ DETTA FORMAT STEG FÖR STEG:
+FÖLJ DETTA FORMAT STEG FÖR STEG (SKRIV UTAN RUBRIKER):
 ---
 1. Skriv en tydlig och slagkraftig rubrik som fångar motionens kärna
 2. Skriv en inledning som ger kontext och kopplar till partiets värderingar
@@ -148,6 +157,7 @@ VIKTIGT:
 - Skriv "Sverigedemokraterna yrkar" ENDAST i förslag-delen
 - Skriv i partiets retoriska stil
 - Använd konkreta exempel och siffror när möjligt
+- Skriv UTAN rubriker som "Rubrik:", "Inledning:", etc.
 ---`
 
     const stream = await openai.chat.completions.create({
