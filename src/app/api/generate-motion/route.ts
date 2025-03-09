@@ -45,18 +45,8 @@ export async function POST(req: NextRequest) {
     try {
       console.log('Attempting to log usage for topic:', topic)
       
-      // Använd relativ URL istället för absolut
-      const logUrl = '/api/log-usage'
-      
-      console.log('Making log request to:', {
-        url: logUrl,
-        topic,
-        email: email || userId, // Använd userId som fallback
-        nodeEnv: process.env.NODE_ENV,
-        vercelUrl: process.env.VERCEL_URL
-      })
-
-      const logResponse = await fetch(logUrl, {
+      // Använd Request-objektet för att göra en intern API-anrop
+      const logRequest = new Request(new URL('/api/log-usage', req.url), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -64,8 +54,18 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({ 
           topic,
           email: email || userId // Använd userId som fallback
-        }),
+        })
       })
+      
+      console.log('Making log request to:', {
+        url: logRequest.url,
+        topic,
+        email: email || userId,
+        nodeEnv: process.env.NODE_ENV,
+        vercelUrl: process.env.VERCEL_URL
+      })
+
+      const logResponse = await fetch(logRequest)
       
       console.log('Log usage response:', {
         status: logResponse.status,

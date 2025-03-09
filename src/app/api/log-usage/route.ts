@@ -22,8 +22,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Hämta data från request body
     console.log('Parsing request body...')
-    const body = await request.json()
-    console.log('Request body:', body)
+    let body;
+    try {
+      body = await request.json()
+      console.log('Request body:', body)
+    } catch (parseError) {
+      console.error('Failed to parse request body:', parseError)
+      return new NextResponse('Invalid request body', { status: 400 })
+    }
+
     const { topic, email } = body
 
     if (!topic || !email) {
@@ -47,7 +54,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     console.log('Attempting to save log:', {
       filename,
-      logData
+      logData,
+      blobToken: process.env.BLOB_READ_WRITE_TOKEN ? 'Present' : 'Missing'
     })
 
     try {
@@ -55,7 +63,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       const blob = await put(filename, JSON.stringify(logData), {
         access: 'public',
         addRandomSuffix: false,
-        contentType: 'application/json'
+        contentType: 'application/json',
+        token: process.env.BLOB_READ_WRITE_TOKEN // Explicitly pass token
       })
 
       console.log('Successfully saved to blob:', {
@@ -63,7 +72,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         pathname: blob.pathname
       })
 
-      return NextResponse.json({ success: true, blob })
+      return NextResponse.json({ 
+        success: true, 
+        blob: {
+          url: blob.url,
+          pathname: blob.pathname
+        }
+      })
     } catch (blobError) {
       console.error('Error saving to blob:', blobError)
       if (blobError instanceof Error) {
@@ -73,7 +88,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           stack: blobError.stack
         })
       }
-      throw blobError
+      // Return a more specific error message
+      return new NextResponse(
+        JSON.stringify({
+          error: 'Failed to save to Blob Storage',
+          details: blobError instanceof Error ? blobError.message : 'Unknown error'
+        }),
+        { 
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      )
     }
   } catch (error) {
     console.error('Error in log-usage:', error)
@@ -84,6 +111,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         stack: error.stack
       })
     }
-    return new NextResponse('Internal Server Error', { status: 500 })
+    return new NextResponse(
+      JSON.stringify({
+        error: 'Internal Server Error',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }),
+      { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    )
   }
 } 
