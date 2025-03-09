@@ -45,12 +45,8 @@ export async function POST(req: NextRequest) {
     try {
       console.log('Attempting to log usage for topic:', topic)
       
-      // Använd absolut URL för att vara säker
-      const origin = process.env.NODE_ENV === 'production'
-        ? `https://${process.env.VERCEL_URL}`
-        : 'http://localhost:3000'
-      
-      const logUrl = `${origin}/api/log-usage`
+      // Använd relativ URL istället för absolut
+      const logUrl = '/api/log-usage'
       
       console.log('Making log request to:', {
         url: logUrl,
